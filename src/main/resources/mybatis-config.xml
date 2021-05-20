@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <settings>
+
+        <!-- 获取数据库自增主键值 -->
+        <setting name="useGeneratedKeys" value="true"/>
+
+        <!-- 使用列别名替换列名，默认为 true -->
+        <setting name="useColumnLabel" value="true"/>
+
+        <!-- 开启驼峰命名转换：Table(create_time) => Entity(createTime) -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <setting name="callSettersOnNulls" value="true"/>
+
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+        <!--        <setting name="logImpl" value="SLF4J"/>-->
+
+
+    </settings>
+
+    <!-- 实体类,简称 -设置别名 -->
+    <typeAliases>
+        <package name="com.yy.security.entity"/>
+    </typeAliases>
+    <!-- 实体接口映射资源 -->
+    <!--
+        说明：如果xxMapper.xml配置文件放在和xxMapper.java统一目录下，mappers也可以省略，
+        因为org.mybatis.spring.mapper.MapperFactoryBean默认会去查找与xxMapper.java相同目录和名称的xxMapper.xml
+    -->
+
+</configuration>
