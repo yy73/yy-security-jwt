@@ -1,5 +1,7 @@
 package com.yy.security.config;
 
+import cn.hutool.log.Log;
+import cn.hutool.log.LogFactory;
 import com.yy.security.Util.MD5Util;
 import com.yy.security.entity.PermissionEntity;
 import com.yy.security.filter.JWTAuthorizationFilter;
@@ -7,6 +9,7 @@ import com.yy.security.filter.JWTAuthorizationFilter;
 import com.yy.security.mapper.PermissionMapper;
 import com.yy.security.service.impl.MyUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -22,10 +25,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.logging.Level;
 
 @Component
 @EnableWebSecurity
 public class SecuriytConfig extends WebSecurityConfigurerAdapter {
+
+    private static final Log log = LogFactory.get();
 
     @Autowired
     private MyUserService myUserService;
@@ -38,6 +44,9 @@ public class SecuriytConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private JwtAccessDeniedHandler jwtAccessDeniedHandler;
+
+    @Value("${ignore.urls:}")
+    private String[] ingores;
 
     /**
      * 添加授权账户
@@ -82,7 +91,8 @@ public class SecuriytConfig extends WebSecurityConfigurerAdapter {
      **/
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/user/**");
+        log.info("加载白名单开始--------------------", Level.INFO);
+        web.ignoring().antMatchers(ingores);
     }
 
     @Bean

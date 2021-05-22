@@ -15,6 +15,11 @@
     <description>Demo project for Spring Boot</description>
     <properties>
         <java.version>1.8</java.version>
+        <mybatis.spring.version>2.1.4</mybatis.spring.version>
+        <jwt.version>0.9.1</jwt.version>
+        <fastjson.version>1.2.62</fastjson.version>
+        <hutool.version>5.6.5</hutool.version>
+        <druid.version>1.2.4</druid.version>
     </properties>
     <dependencies>
         <dependency>
@@ -24,7 +29,7 @@
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>2.1.4</version>
+            <version>${mybatis.spring.version}</version>
         </dependency>
         <!-->spring-boot 整合security -->
         <dependency>
@@ -49,13 +54,13 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
-            <version>0.9.1</version>
+            <version>${jwt.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.62</version>
+            <version>${fastjson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -64,7 +69,13 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
-            <version>5.6.5</version>
+            <version>${hutool.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.alibaba/druid-spring-boot-starter -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-starter</artifactId>
+            <version>${druid.version}</version>
         </dependency>
 
     </dependencies>

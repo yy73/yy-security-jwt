@@ -4,6 +4,7 @@ spring:
     username: root
     password: 55555
     driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
 
 mybatis:
   config-location: classpath:mybatis-config.xml
@@ -21,3 +22,7 @@ jwt:
   role:
     claims: yy-roles
   tokenHead: Bearer  #JWT负载中拿到开头
+
+# 添加白名单
+ignore:
+  urls: /user/**,/jwt/getUsername
