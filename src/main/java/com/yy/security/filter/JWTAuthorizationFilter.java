@@ -1,14 +1,24 @@
 package com.yy.security.filter;
 
+import cn.hutool.json.JSONUtil;
+import cn.hutool.log.Log;
+import cn.hutool.log.LogFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yy.security.Util.JwtUtil;
+import com.yy.security.entity.result.Response;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -22,47 +32,46 @@ import java.util.Map;
 /**
  * @Author ywl
  * @Date 2021/5/17 10:48
- * @Description
+ * @Description jwt 登录授权过滤器
  */
-public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
+public class JWTAuthorizationFilter extends OncePerRequestFilter {
+
+    private static final Log log = LogFactory.get();
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Value("${jwt.tokenHeader}")
+    private String tokenHeader;
+    @Value("${jwt.tokenHead}")
+    private String tokenHead;
+
+    @Qualifier("myUserService")
+    @Autowired
+    private UserDetailsService userDetailsService;
 
 
-    public JWTAuthorizationFilter(AuthenticationManager authenticationManager) {
-        super(authenticationManager);
-    }
-
-    /**
-     * 账号密码 验证成功
-     *
-     * @param request
-     * @param response
-     * @param chain
-     * @throws IOException
-     * @throws ServletException
-     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain chain) throws IOException, ServletException {
+                                    FilterChain chain) throws ServletException, IOException {
+        String authHeader = request.getHeader(tokenHeader);
+        if (authHeader != null && authHeader.startsWith(this.tokenHead)) {
+            String authToken = authHeader.substring(this.tokenHead.length());// The part after "Bearer "
+            String username = jwtUtil.getUsername(authToken);
+            log.info("checking username:{}", username);
 
-
-        String tokenHeader = request.getHeader("token");
-
-        // 如果请求头中有token，则进行解析，并且设置认证信息
-        SecurityContextHolder.getContext().setAuthentication(getAuthentication(tokenHeader));
-        super.doFilterInternal(request, response, chain);
-    }
-
-    // 这里从token中获取用户信息并新建一个token
-    private UsernamePasswordAuthenticationToken getAuthentication(String tokenHeader) {
-            String username = JwtUtil.getUsername(tokenHeader);
-            if (username != null) {
-                List<SimpleGrantedAuthority> userRoles = JwtUtil.getUserRole(tokenHeader);
-                return new UsernamePasswordAuthenticationToken(username, null, userRoles);
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+                // 判断token 是否有效
+                if (jwtUtil.validateToken(authToken, userDetails)) {
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    log.info("authenticated user:{}", username);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
-
-        return null;
+        }
+        chain.doFilter(request, response);
     }
-
-
 }

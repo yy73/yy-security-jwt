@@ -18,16 +18,8 @@ import java.util.Date;
 @RequestMapping("/jwt")
 public class TokenController {
 
-    /**
-     * 检查token
-     *
-     * @param token
-     * @return
-     */
-    @GetMapping("/checkJWT")
-    public Claims checkJWT(String token) {
-        return JwtUtil.checkJWT(token);
-    }
+    @Autowired
+    private JwtUtil jwtUtil;
 
     /**
      * 获取 token中用户名
@@ -37,7 +29,7 @@ public class TokenController {
      */
     @GetMapping("/getUsername")
     public String getUsername(String token) {
-        return JwtUtil.getUsername(token);
+        return jwtUtil.getUsername(token);
     }
 
     /**
@@ -48,7 +40,7 @@ public class TokenController {
      */
     @GetMapping("/isTokenExpired")
     public boolean isTokenExpired(String token) {
-        return JwtUtil.isExpiration(token);
+        return jwtUtil.isExpiration(token);
     }
 
     /**
@@ -59,7 +51,7 @@ public class TokenController {
      */
     @GetMapping("/refreshToken")
     public String refreshToken(String token) {
-        return JwtUtil.refreshToken(token);
+        return jwtUtil.refreshToken(token);
     }
 
 }

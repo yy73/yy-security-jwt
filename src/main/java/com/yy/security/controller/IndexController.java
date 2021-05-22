@@ -6,15 +6,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class IndexController {
-    /**
-     * 跳转到首页
-     *
-     * @return
-     */
-    @RequestMapping("/")
-    public String index() {
-        return "index";
-    }
 
     @ResponseBody
     @RequestMapping("/addMember")

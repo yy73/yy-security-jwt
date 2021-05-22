@@ -8,7 +8,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -20,65 +23,33 @@ import java.util.Map;
  * @Date 2021/5/16 17:39
  * @Description JWT util
  */
+@Component
 public class JwtUtil {
 
     private static final Log log = LogFactory.get();
 
-    private static final String SUBJECT = "yy-jwt";
-
-    // 过期时间 1分钟
-    private static final long EXPIRITION = 1000 * 60;
-
-    private static final String APPSECRET_KEY = "yy_secret";
-
-    private static final String ROLE_CLAIMS = "roles";
-
     private static final String CLAIM_KEY_CREATED = "created";
 
-    public static String generateJsonWebToken(UserEntity user) {
+
+    @Value("${jwt.expirition}")
+    private long expirition;
+
+    @Value("${jwt.secret}")
+    private String secret;
+
+    @Value("${jwt.role.claims}")
+    private String claims;
+
+    // 生成token
+    public String generateJsonWebToken(UserEntity user) {
         String token = Jwts
                 .builder()
-                .setSubject(SUBJECT)
-                .claim(ROLE_CLAIMS, user.getAuthorities())
-//                .claim("id", user.getId())
+                .claim(claims, user.getAuthorities())
                 .claim("username", user.getUsername())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRITION))
-                .signWith(SignatureAlgorithm.HS256, APPSECRET_KEY).compact();
+                .setExpiration(new Date(System.currentTimeMillis() + expirition * 1000))
+                .signWith(SignatureAlgorithm.HS256, secret).compact();
         return token;
-    }
-
-    /**
-     * 生成token
-     *
-     * @param username
-     * @param role
-     * @return
-     */
-    public static String createToken(String username, String role) {
-        Map<String, Object> map = new HashMap<>();
-        map.put(ROLE_CLAIMS, role);
-
-        String token = Jwts
-                .builder()
-                .setSubject(username)
-                .setClaims(map)
-                .claim("username", username)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRITION))
-                .signWith(SignatureAlgorithm.HS256, APPSECRET_KEY).compact();
-        return token;
-    }
-
-    // 检查token
-    public static Claims checkJWT(String token) {
-        try {
-            final Claims claims = Jwts.parser().setSigningKey(APPSECRET_KEY).parseClaimsJws(token).getBody();
-            return claims;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     /**
@@ -87,9 +58,21 @@ public class JwtUtil {
      * @param token
      * @return
      */
-    public static String getUsername(String token) {
-        Claims claims = Jwts.parser().setSigningKey(APPSECRET_KEY).parseClaimsJws(token).getBody();
+    public String getUsername(String token) {
+        Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
         return claims.get("username").toString();
+    }
+
+
+    /**
+     * 验证token是否还有效
+     *
+     * @param token       客户端传入的token
+     * @param userDetails 从数据库中查询出来的用户信息
+     */
+    public boolean validateToken(String token, UserDetails userDetails) {
+        String username = getUsername(token);
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     /**
@@ -98,9 +81,9 @@ public class JwtUtil {
      * @param token
      * @return
      */
-    public static List<SimpleGrantedAuthority> getUserRole(String token) {
-        Claims claims = Jwts.parser().setSigningKey(APPSECRET_KEY).parseClaimsJws(token).getBody();
-        List roles = (List) claims.get(ROLE_CLAIMS);
+    public List<SimpleGrantedAuthority> getUserRole(String token) {
+        Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+        List roles = (List) claims.get(claims);
         String json = JSONArray.toJSONString(roles);
         List<SimpleGrantedAuthority>
                 grantedAuthorityList =
@@ -115,15 +98,15 @@ public class JwtUtil {
      * @param token
      * @return
      */
-    public static boolean isExpiration(String token) {
-        Claims claims = Jwts.parser().setSigningKey(APPSECRET_KEY).parseClaimsJws(token).getBody();
+    public boolean isExpiration(String token) {
+        Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
         return claims.getExpiration().before(new Date());
     }
 
     /**
      * 判断token是否已经失效
      */
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         Date expiredDate = getExpiredDateFromToken(token);
         return expiredDate.before(new Date());
     }
@@ -131,7 +114,7 @@ public class JwtUtil {
     /**
      * 从token中获取过期时间
      */
-    private Date getExpiredDateFromToken(String token) {
+    public Date getExpiredDateFromToken(String token) {
         Claims claims = getClaimsFromToken(token);
         return claims.getExpiration();
     }
@@ -139,11 +122,11 @@ public class JwtUtil {
     /**
      * 从token中获取JWT中的负载
      */
-    private static Claims getClaimsFromToken(String token) {
+    public Claims getClaimsFromToken(String token) {
         Claims claims = null;
         try {
             claims = Jwts.parser()
-                    .setSigningKey(APPSECRET_KEY)
+                    .setSigningKey(secret)
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
@@ -158,13 +141,13 @@ public class JwtUtil {
      * @param token
      * @return
      */
-    public static String refreshToken(String token) {
+    public String refreshToken(String token) {
         Claims claims = getClaimsFromToken(token);
         claims.put(CLAIM_KEY_CREATED, new Date());
 
         String compact = Jwts.builder().setClaims(claims)
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRITION))
-                .signWith(SignatureAlgorithm.HS256, APPSECRET_KEY).compact();
+                .setExpiration(new Date(System.currentTimeMillis() + expirition))
+                .signWith(SignatureAlgorithm.HS256, secret).compact();
         return compact;
     }
 

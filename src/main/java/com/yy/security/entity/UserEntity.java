@@ -13,22 +13,25 @@ import java.util.List;
 @Data
 public class UserEntity implements UserDetails {
 
-	private Integer id;
-	private String username;
-	private String realname;
-	private String password;
-	private Date createDate;
-	private Date lastLoginTime;
-	private boolean enabled;
-	private boolean accountNonExpired;
-	private boolean accountNonLocked;
-	private boolean credentialsNonExpired;
-	// 用户所有权限
-	private List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+    private Integer id;
+    private String username;
+    private String realname;
+    private String password;
+    private Date createDate;
+    private Date lastLoginTime;
+    private boolean enabled;
+    // 账号是否到期
+    private boolean accountNonExpired;
+    //账号是否被锁定
+    private boolean accountNonLocked;
+    // 证书是否到期
+    private boolean credentialsNonExpired;
+    // 用户所有权限
+    private List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 
-	public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Collection<? extends GrantedAuthority> getAuthorities() {
 
-		return authorities;
-	}
+        return authorities;
+    }
 
 }

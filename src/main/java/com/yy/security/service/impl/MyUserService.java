@@ -1,4 +1,4 @@
-package com.yy.security.service;
+package com.yy.security.service.impl;
 
 import com.yy.security.entity.PermissionEntity;
 import com.yy.security.entity.UserEntity;

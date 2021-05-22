@@ -3,10 +3,12 @@ package com.yy.security.config;
 import com.yy.security.Util.MD5Util;
 import com.yy.security.entity.PermissionEntity;
 import com.yy.security.filter.JWTAuthorizationFilter;
-import com.yy.security.filter.JwtLoginFilter;
+//import com.yy.security.filter.JwtLoginFilter;
 import com.yy.security.mapper.PermissionMapper;
-import com.yy.security.service.MyUserService;
+import com.yy.security.service.impl.MyUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -14,7 +16,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,7 +35,7 @@ public class SecuriytConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    
+
     @Autowired
     private JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
@@ -40,25 +44,7 @@ public class SecuriytConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(myUserService).passwordEncoder(new PasswordEncoder() {
-            @Override
-            public String encode(CharSequence rawPassword) {
-                return MD5Util.encode((String) rawPassword);
-            }
-
-            /**
-             *
-             * @param rawPassword 用户输入得密码
-             * @param encodedPassword
-             * @return
-             */
-            @Override
-            public boolean matches(CharSequence rawPassword, String encodedPassword) {
-                String encode = MD5Util.encode((String) rawPassword);
-                boolean result = encode.equals(encodedPassword);
-                return result;
-            }
-        });
+        auth.userDetailsService(myUserService).passwordEncoder(passwordEncoder());
     }
 
     @Override
@@ -70,17 +56,19 @@ public class SecuriytConfig extends WebSecurityConfigurerAdapter {
         permission.forEach(p -> authorizeRequests.antMatchers(p.getUrl()).hasAnyAuthority(p.getPermTag()));
 
 
-        authorizeRequests.antMatchers("/auth/login").permitAll()
-                .antMatchers("/**").fullyAuthenticated()
+        authorizeRequests
+                .antMatchers(HttpMethod.OPTIONS).permitAll()//跨域请求会先进行一次options请求
+                .antMatchers("/**").authenticated()
                 .and()
-                .addFilter(new JWTAuthorizationFilter(authenticationManager()))
-                .addFilter(new JwtLoginFilter(authenticationManager())).csrf().disable()
+                .addFilterBefore(jwtAuthenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+                .csrf().disable()
                 .exceptionHandling() // 配置无权限认证/未登录认证
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint) // 处理 未登录 操作
                 .accessDeniedHandler(jwtAccessDeniedHandler) // 处理无权限操作
                 .and()
                 // 不需要session
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 
     /**
@@ -94,7 +82,17 @@ public class SecuriytConfig extends WebSecurityConfigurerAdapter {
      **/
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/demo/login");
+        web.ignoring().antMatchers("/user/**");
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public JWTAuthorizationFilter jwtAuthenticationTokenFilter() {
+        return new JWTAuthorizationFilter();
     }
 
 }

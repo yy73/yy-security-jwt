@@ -19,6 +19,23 @@ public interface UserMapper {
      */
     UserEntity findByUsername(@Param("userName") String userName);
 
+
+    /**
+     * 根据用户名称获取用户
+     *
+     * @param userName
+     * @return
+     */
+    List<UserEntity> getUser(@Param("userName") String userName);
+
+    /**
+     * 添加用户
+     *
+     * @param userEntity
+     * @return
+     */
+    int insertUser(UserEntity userEntity);
+
     /**
      * 查询用户的权限根据用户查询权限
      *
