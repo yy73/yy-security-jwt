@@ -3,6 +3,7 @@ package com.yy.security.mapper;
 
 import com.yy.security.entity.PermissionEntity;
 import com.yy.security.entity.UserEntity;
+import com.yy.security.user.UserInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -37,10 +38,19 @@ public interface UserMapper {
     int insertUser(UserEntity userEntity);
 
     /**
+     * 获取用户信息
+     *
+     * @param userName
+     * @return
+     */
+    UserInfo getUserInfo(@Param("userName") String userName);
+
+    /**
      * 查询用户的权限根据用户查询权限
      *
      * @param userName
      * @return
      */
     List<PermissionEntity> findPermissionByUsername(@Param("userName") String userName);
+
 }

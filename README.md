@@ -17,5 +17,7 @@ springsecurit整合jwt实现前后端分离
 
 - 对 token 值 进行校验，刷新，检测
 
+- 添加获取用户信息，CurrentUserHolder
+
   
 

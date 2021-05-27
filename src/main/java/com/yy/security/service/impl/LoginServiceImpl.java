@@ -10,6 +10,8 @@ import com.yy.security.entity.UserRegister;
 import com.yy.security.entity.result.Response;
 import com.yy.security.mapper.UserMapper;
 import com.yy.security.service.LoginService;
+import com.yy.security.user.CurrentUserHolder;
+import com.yy.security.user.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -48,7 +50,7 @@ public class LoginServiceImpl implements LoginService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
 
         if (!passwordEncoder.matches(password, userDetails.getPassword())) {
-            throw new BadCredentialsException("密码不正确");
+            return Response.error("用户名或密码错误，请重新登录!");
         }
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);

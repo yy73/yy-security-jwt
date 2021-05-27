@@ -13,7 +13,7 @@ public class LoginController {
     @Autowired
     private LoginService loginService;
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     public Response login(String userName, String password) {
         return loginService.login(userName, password);
     }

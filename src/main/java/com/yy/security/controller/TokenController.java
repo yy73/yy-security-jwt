@@ -1,6 +1,7 @@
 package com.yy.security.controller;
 
 import com.yy.security.Util.JwtUtil;
+import com.yy.security.user.CurrentUserHolder;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

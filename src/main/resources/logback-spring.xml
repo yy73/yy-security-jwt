@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 日志文件输出格式 -->
+    <property name="DEV-PATTERN"
+              value="%red(%d{HH:mm:ss}) %green([%thread]) %highlight(%-5level) %boldMagenta(%logger{10}) - %cyan(%msg%n)"/>
+
+    <!-- 开发环境(dev)日志文件路径 -->
+    <property name="DEV_FILE_PATH" value="logs"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${DEV-PATTERN}</pattern>
+        </encoder>
+    </appender>
+    <!--        <logger name="com.tl.rdc.session" level="ERROR"/>-->
+    <logger name="com.yy.security.mapper" level="DEBUG"/>
+    <!-- 指定特定包下的日志输出TRACE, DEBUG, INFO, WARN, ERROR, ALL和OFF -->
+    <logger name="com.yy.security" level="INFO"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+
+</configuration>

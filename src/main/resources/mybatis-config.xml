@@ -14,8 +14,8 @@
         <setting name="mapUnderscoreToCamelCase" value="true"/>
         <setting name="callSettersOnNulls" value="true"/>
 
-        <setting name="logImpl" value="STDOUT_LOGGING"/>
-        <!--        <setting name="logImpl" value="SLF4J"/>-->
+<!--        <setting name="logImpl" value="STDOUT_LOGGING"/>-->
+                <setting name="logImpl" value="SLF4J"/>
 
 
     </settings>

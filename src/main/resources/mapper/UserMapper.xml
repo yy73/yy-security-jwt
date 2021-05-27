@@ -26,4 +26,9 @@
         from sys_user
         where username = #{userName};
     </select>
+    <select id="getUserInfo" resultType="com.yy.security.user.UserInfo">
+        select *
+        from sys_user
+        where username = #{userName}
+    </select>
 </mapper>
