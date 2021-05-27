@@ -19,5 +19,9 @@ springsecurit整合jwt实现前后端分离
 
 - 添加获取用户信息，CurrentUserHolder
 
+# 计划
+
+- 整合 redis，将用户信息存入redis缓存中
+
   
 
