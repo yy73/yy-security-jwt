@@ -2,10 +2,8 @@ package com.yy.security.config;
 
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
-import com.yy.security.Util.MD5Util;
 import com.yy.security.entity.PermissionEntity;
 import com.yy.security.filter.JWTAuthorizationFilter;
-//import com.yy.security.filter.JwtLoginFilter;
 import com.yy.security.mapper.PermissionMapper;
 import com.yy.security.service.impl.MyUserService;
 import org.springframework.beans.factory.annotation.Autowired;
