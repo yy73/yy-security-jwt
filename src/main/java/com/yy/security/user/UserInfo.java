@@ -11,7 +11,7 @@ import java.util.Date;
  */
 @Data
 public class UserInfo {
-    private Integer id;
+    private String id;
     private String username;
     private String realname;
     private Date createDate;

@@ -20,6 +20,13 @@ public interface UserMapper {
      */
     UserEntity findByUsername(@Param("userName") String userName);
 
+    /**
+     * 获取所有的用户信息
+     *
+     * @return
+     */
+    List<UserEntity> findByUsernameList();
+
 
     /**
      * 根据用户名称获取用户
@@ -44,6 +51,13 @@ public interface UserMapper {
      * @return
      */
     UserInfo getUserInfo(@Param("userName") String userName);
+
+    /**
+     * 获取所有的用户信息
+     *
+     * @return
+     */
+    List<UserInfo> getUserInfoList();
 
     /**
      * 查询用户的权限根据用户查询权限

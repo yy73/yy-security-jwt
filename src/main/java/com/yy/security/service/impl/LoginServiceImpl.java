@@ -2,12 +2,16 @@ package com.yy.security.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.json.JSONUtil;
 import com.yy.security.Util.JwtUtil;
+import com.yy.security.Util.RedisUtil;
 import com.yy.security.entity.UserEntity;
 import com.yy.security.entity.UserRegister;
 import com.yy.security.entity.result.Response;
 import com.yy.security.mapper.UserMapper;
 import com.yy.security.service.LoginService;
+import com.yy.security.user.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,7 +32,7 @@ import java.util.List;
 @Service
 public class LoginServiceImpl implements LoginService {
 
-    @Qualifier("myUserService")
+    @Qualifier("userDetailsServiceImpl")
     @Autowired
     private UserDetailsService userDetailsService;
 
@@ -39,6 +44,9 @@ public class LoginServiceImpl implements LoginService {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Override
     public Response login(String userName, String password) {
@@ -56,6 +64,7 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Response register(UserRegister ur) {
         UserEntity userEntity = BeanUtil.copyProperties(ur, UserEntity.class);
         List<UserEntity> un = userMapper.getUser(userEntity.getUsername());
@@ -65,13 +74,16 @@ public class LoginServiceImpl implements LoginService {
         }
         // 密码加密
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
-        userEntity.setId((int) System.currentTimeMillis());
+        userEntity.setId(IdUtil.simpleUUID());
         userEntity.setEnabled(true);
         userEntity.setAccountNonExpired(true);
         userEntity.setAccountNonLocked(true);
         userEntity.setCredentialsNonExpired(true);
 
         userMapper.insertUser(userEntity);
+        // 将用户信息 添加到 redis中
+        UserInfo userInfo = userMapper.getUserInfo(userEntity.getUsername());
+        redisUtil.hmSet("userInfo", userInfo.getUsername(), JSONUtil.toJsonStr(userInfo));
         return Response.success();
     }
 }

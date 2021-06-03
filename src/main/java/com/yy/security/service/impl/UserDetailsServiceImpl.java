@@ -1,5 +1,7 @@
 package com.yy.security.service.impl;
 
+import cn.hutool.json.JSONUtil;
+import com.yy.security.Util.RedisUtil;
 import com.yy.security.entity.PermissionEntity;
 import com.yy.security.entity.UserEntity;
 import com.yy.security.mapper.UserMapper;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @Author ywl
@@ -20,19 +23,26 @@ import java.util.List;
  * @Description
  */
 @Service
-public class MyUserService implements UserDetailsService {
+public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private RedisUtil redisUtil;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity userEntity = userMapper.findByUsername(username);
-        if (userEntity == null) {
+        Object users = redisUtil.get("user:userDetail:" + username);
+
+        if (users == null) {
             return null;
         }
 
-        List<PermissionEntity> permission = userMapper.findPermissionByUsername(userEntity.getUsername());
+        UserEntity userEntity = JSONUtil.toBean(JSONUtil.parseObj(users.toString()), UserEntity.class);
+
+
+        List<PermissionEntity> permission = JSONUtil.toList(JSONUtil.parseArray(redisUtil.get("user:permission:" + userEntity.getUsername())), PermissionEntity.class);
         List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 
         permission.forEach(user -> {

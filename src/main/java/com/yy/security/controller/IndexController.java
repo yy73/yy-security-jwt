@@ -12,9 +12,6 @@ public class IndexController {
     @ResponseBody
     @RequestMapping("/addMember")
     public String addMember() {
-        UserInfo userInfo = CurrentUserHolder.get();
-        System.out.println(userInfo);
-
         return "新增用户";
     }
 

@@ -5,7 +5,7 @@ import cn.hutool.log.LogFactory;
 import com.yy.security.entity.PermissionEntity;
 import com.yy.security.filter.JWTAuthorizationFilter;
 import com.yy.security.mapper.PermissionMapper;
-import com.yy.security.service.impl.MyUserService;
+import com.yy.security.service.impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +23,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.logging.Level;
 
 @Component
 @EnableWebSecurity
@@ -32,7 +31,7 @@ public class SecuriytConfig extends WebSecurityConfigurerAdapter {
     private static final Log log = LogFactory.get();
 
     @Autowired
-    private MyUserService myUserService;
+    private UserDetailsServiceImpl userDetailsServiceImpl;
 
     @Autowired
     private PermissionMapper permissionMapper;
@@ -51,7 +50,7 @@ public class SecuriytConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(myUserService).passwordEncoder(passwordEncoder());
+        auth.userDetailsService(userDetailsServiceImpl).passwordEncoder(passwordEncoder());
     }
 
     @Override
@@ -89,7 +88,6 @@ public class SecuriytConfig extends WebSecurityConfigurerAdapter {
      **/
     @Override
     public void configure(WebSecurity web) throws Exception {
-        log.info("加载白名单开始--------------------", Level.INFO);
         web.ignoring().antMatchers(ingores);
     }
 

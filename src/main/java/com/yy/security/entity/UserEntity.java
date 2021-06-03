@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 public class UserEntity implements UserDetails {
 
-    private Integer id;
+    private String id;
     private String username;
     private String realname;
     private String password;

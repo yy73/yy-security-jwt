@@ -27,8 +27,32 @@
         where username = #{userName};
     </select>
     <select id="getUserInfo" resultType="com.yy.security.user.UserInfo">
-        select *
+        select id,
+               username,
+               realname,
+               createDate,
+               lastLoginTime,
+               enabled,
+               accountNonExpired,
+               accountNonLocked,
+               credentialsNonExpired
         from sys_user
         where username = #{userName}
+    </select>
+    <select id="getUserInfoList" resultType="com.yy.security.user.UserInfo">
+        select id,
+               username,
+               realname,
+               DATE_FORMAT(createDate, '%Y-%c-%d')    as createDate,
+               DATE_FORMAT(lastLoginTime, '%Y-%c-%d') as lastLoginTime,
+               enabled,
+               accountNonExpired,
+               accountNonLocked,
+               credentialsNonExpired
+        from sys_user;
+    </select>
+    <select id="findByUsernameList" resultType="com.yy.security.entity.UserEntity">
+        select *
+        from sys_user
     </select>
 </mapper>

@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class PermissionEntity {
-	private Integer id;
+	private String id;
 	// 权限名称
 	private String permName;
 	// 权限标识

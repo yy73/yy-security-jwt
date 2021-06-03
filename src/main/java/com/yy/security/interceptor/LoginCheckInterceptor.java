@@ -1,8 +1,11 @@
 package com.yy.security.interceptor;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import com.yy.security.Util.JwtUtil;
+import com.yy.security.Util.RedisUtil;
 import com.yy.security.mapper.UserMapper;
 import com.yy.security.user.CurrentUserHolder;
 import com.yy.security.user.UserInfo;
@@ -31,6 +34,8 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
     private JwtUtil jwtUtil;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -38,7 +43,14 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
         if (authHeader != null && authHeader.startsWith(this.tokenHead)) {
             String authToken = authHeader.substring(this.tokenHead.length());// The part after "Bearer "
             String username = jwtUtil.getUsername(authToken);
-            UserInfo userInfo = this.userMapper.getUserInfo(username);
+            String userInfo1 = redisUtil.get("user:userInfo:" + username).toString();
+            UserInfo userInfo = null;
+            if (StrUtil.isNotBlank(userInfo1)) {
+                userInfo = JSONUtil.toBean(JSONUtil.parseObj(userInfo1), UserInfo.class);
+            } else {
+                userInfo = this.userMapper.getUserInfo(username);
+
+            }
             CurrentUserHolder.set(userInfo);
         }
         return true;

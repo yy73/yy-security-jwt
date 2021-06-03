@@ -5,10 +5,16 @@ spring:
     password: 55555
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
+  redis:
+    database: 0
+    host: localhost
+    port: 6379
+    password:
 
 mybatis:
   config-location: classpath:mybatis-config.xml
   mapper-locations: classpath:mapper/*.xml
+
 
 
 #jwt 配置
@@ -25,4 +31,4 @@ jwt:
 
 # 添加白名单
 ignore:
-  urls: /user/**,/jwt/getUsername
+  urls: /user/**,/jwt/getUsername,/redis/**
